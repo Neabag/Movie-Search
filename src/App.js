@@ -1,67 +1,64 @@
 import React, { useState, useRef } from 'react';
 import './App.css';
-const api = {
-  key: "f7fd9ad508d3cc03e604f035578f6f53",
-  base: "https://api.openweathermap.org/data/2.5/weather"
-}
+import axios from 'axios';
+import Results from './Components/Results';
+import Search from './Components/Search';
+import Popup from './Components/Popup';
+
 function App() {
-  const [query, setQuery] = useState('');
-  const [weather, setWeather] = useState({});
+  const apiUrl = "http://www.omdbapi.com/?apikey=190a1e19";
+  const [state, setState] = useState({
+    searchText: '',
+    results: [],
+    selected: {}
+  });
+  // const [selected, setSelected] = useState({});
 
-  const inputEl = useRef(null);
-
-  const search = event => {
-    if (event.key === "Enter") {
-      fetch(`${api.base}?q=${query}&units=metric&APPID=${api.key}`)
-        .then(res => res.json())
-        .then(result => {
-          setWeather(result);
-          setQuery('');
-          inputEl.current.blur();
-          // console.log(weather);
-          // console.log(result);
-
-        });
-    }
-  }
-  const dateBuilder = (d) => {
-    let months = ["January", "February", "March", "April", "May", "June", "July",
-      "August", "September", "October", "November", "December"];
-    let days = ["Sunday", "Monday", "Tuesday", "Wednesday", "thursday", "Friday", "Saturday"];
-
-    let day = days[d.getDay()];
-    let date = d.getDate();
-    let month = months[d.getMonth()];
-    let year = d.getFullYear();
-    return `${day} ${date} ${month} ${year}`
+  const inputChangeHandler = (evt) => {
+    let searchText = evt.target.value;
+    setState(prevState => {
+      return { ...prevState, searchText: searchText }
+    });
   };
+  const search = (evt) => {
+    if (evt.key === "Enter") {
+      axios(apiUrl + "&s=" + state.searchText)
+        .then(({ data }) => {
+          let results = data.Search;
+          console.log(results)
+          setState(prevState => {
+            return { ...prevState, results: results }
+          });
+        })
+    }
+  };
+  const openPopup = id => {
+    axios(apiUrl + "&i=" + id).then(({ data }) => {
+      let result = data;
+      console.log(result);
+      setState(prevState => {
+        return { ...prevState, selected: result }
+      });
+      console.log(state.selected, state.selected.Title);
+    });
+  };
+  const closePopup = () => {
+    setState(prevState => {
+      return { ...prevState, selected: {} }
+    });
+  }
   return (
-    <div className={(typeof weather.main != 'undefined') ? ((weather.main.temp > 28) ? "App Warm" : "App Cold") : "App"}>
+    <div className="App">
+      <header>
+        <h1>Movie Database</h1>
+      </header>
       <main>
-        <div className="SearchBox">
-          <input type="text"
-            className="SearchBar"
-            placeholder="Enter City Name"
-            onChange={e => setQuery(e.target.value)}
-            value={query}
-            ref={inputEl}
-            autoFocus={true}
-            onKeyPress={search}
-          /></div>
-        {(typeof weather.main != 'undefined') ? (
-          <div>
-            <div className="LocationBox">
-              <div className="Location">{weather.name}, {weather.sys.country}</div>
-              <div className="Date">{dateBuilder(new Date())}</div>
-            </div>
-            <div className="WeatherBox">
-              <div className="Temp">{Math.round(weather.main.temp)}°C</div>
-              <div className="Weather">{weather.weather[0].main}</div>
-            </div>
-          </div>)
-          : ("")}
+        <Search change={inputChangeHandler}
+          search={search} />
+        <Results results={state.results}
+          openPopup={openPopup} />
+        {(typeof state.selected.Title != "undefined") ? <Popup selected={state.selected} closePopup={closePopup} /> : false}
       </main>
-
     </div>
   );
 }
