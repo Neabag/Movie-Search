@@ -1,6 +1,6 @@
 import React from 'react'
 
-function Popup({ selected, closedPopup }) {
+function Popup({ selected, closePopup }) {
     return (
         <section className="Popup">
             <div className="content" >
@@ -13,7 +13,7 @@ function Popup({ selected, closedPopup }) {
                 <img src={selected.Poster} />
                 <p>{selected.Plot}</p>
             </div>
-            <button className="close" onClick={closedPopup}>Close</button>
+            <button className="close" onClick={closePopup}>Close</button>
         </section>
     )
 }
