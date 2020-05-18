@@ -6,7 +6,7 @@ import Search from './Components/Search';
 import Popup from './Components/Popup';
 
 function App() {
-  const apiUrl = "http://www.omdbapi.com/?apikey=190a1e19";
+  const apiUrl = "https://www.omdbapi.com/?apikey=190a1e19";
   const [state, setState] = useState({
     searchText: '',
     results: [],
